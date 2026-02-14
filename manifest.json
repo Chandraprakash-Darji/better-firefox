@@ -24,5 +24,14 @@
       },
       "description": "Copy current tab URL to clipboard"
     }
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "better-firefox@iamrega.com",
+      "data_collection_permissions": {
+        "required": [],
+        "optional": []
+      }
+    }
   }
 }
