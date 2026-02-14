@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Copy URL Override",
+  "version": "1.0",
+  "description": "Overrides Cmd+Shift+C to copy the current tab URL instead of opening DevTools.",
+  "permissions": ["clipboardWrite", "activeTab"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "commands": {
+    "copy-url": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+C",
+        "mac": "MacCtrl+Shift+C"
+      },
+      "description": "Copy current tab URL to clipboard"
+    }
+  }
+}
