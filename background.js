@@ -25,3 +25,9 @@ api.commands.onCommand.addListener(async (command) => {
     }
   }
 });
+
+api.runtime.onMessage.addListener((message, sender) => {
+  if (message.command === "unload-tab" && sender.tab) {
+    api.tabs.discard(sender.tab.id);
+  }
+});

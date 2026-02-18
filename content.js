@@ -1,9 +1,9 @@
-/* content.js — Copy URL Override */
+/* content.js — Better Firefox */
 
-function showToast(url) {
+function showToast(text) {
   const toast = document.createElement("div");
-  toast.textContent = "✅ URL Copied!";
-  toast.setAttribute("title", url);
+  toast.textContent = text;
+  toast.setAttribute("title", text);
 
   Object.assign(toast.style, {
     position: "fixed",
@@ -51,7 +51,7 @@ function copyCurrentUrl() {
   navigator.clipboard
     .writeText(url)
     .then(() => {
-      showToast(url);
+      showToast("✅ URL Copied!");
     })
     .catch(() => {
       // Fallback using execCommand
@@ -63,7 +63,7 @@ function copyCurrentUrl() {
       textarea.select();
       document.execCommand("copy");
       document.body.removeChild(textarea);
-      showToast(url);
+      showToast("✅ URL Copied!");
     });
 }
 
@@ -71,21 +71,42 @@ function copyCurrentUrl() {
 const api = typeof browser !== "undefined" ? browser : chrome;
 if (api && api.runtime) {
   api.runtime.onMessage.addListener((message) => {
-    if (message && message.action === "copy-url") {
+    if (!message) return;
+    if (message.action === "copy-url") {
       copyCurrentUrl();
+    }
+    if (message.action === "show-toast" && message.text) {
+      showToast(message.text);
     }
   });
 }
 
-// Intercept Cmd+Shift+C / Ctrl+Shift+C in capturing phase to block DevTools
+// ── Keyboard shortcut interception (capturing phase) ──
 window.addEventListener(
   "keydown",
   (e) => {
+    // Feature 1: Cmd+Shift+C → copy URL
     if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.code === "KeyC") {
       e.preventDefault();
       e.stopPropagation();
       e.stopImmediatePropagation();
       copyCurrentUrl();
+      return;
+    }
+
+    // Feature 2: Cmd+W → ask background to discard if pinned, close if not
+    if (
+      (e.metaKey || e.ctrlKey) &&
+      !e.shiftKey &&
+      !e.altKey &&
+      e.code === "KeyW"
+    ) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      if (api && api.runtime) {
+        api.runtime.sendMessage({ action: "unload-tab" });
+      }
     }
   },
   true,
